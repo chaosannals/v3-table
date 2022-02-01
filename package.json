@@ -2,6 +2,9 @@
   "name": "v3-table",
   "version": "0.0.1",
   "main": "dist/v3-table.es.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build --config ./build.config.js",
