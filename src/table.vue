@@ -1,5 +1,14 @@
 <template>
     <div ref="rootElement" class="v3-table" :class="styleClasses">
+        <v3-table-dock
+            :columns="dockLeftColumns"
+            :start="start"
+            :rows="rows"
+            :height="dockHeight"
+            :head-height="headHeight"
+            :row-height="rowHeight"
+            :left="0"
+        />
         <div
             ref="foreElement"
             class="v3-table-fore"
@@ -8,7 +17,7 @@
             @drop="onHeadCellDrop"
             @mousewheel="onMouseWheel"
         >
-            <table v-if="'default' in slots" class="v3-table-main" :style="tableStyle">
+            <table class="v3-table-main" :style="tableStyle">
                 <tr ref="headElement" class="v3-table-head">
                     <th
                         class="v3-table-head-cell"
@@ -38,6 +47,15 @@
                 </tr>
             </table>
         </div>
+        <v3-table-dock
+            :columns="dockRightColumns"
+            :start="start"
+            :rows="rows"
+            :height="dockHeight"
+            :head-height="headHeight"
+            :row-height="rowHeight"
+            :right="dockRight"
+        />
         <div ref="backElement" class="v3-table-back" :style="backStyle" @scroll="onVScroll">
             <div ref="fillElement" class="v3-table-fill" :style="fillStyle"></div>
         </div>
@@ -47,6 +65,7 @@
 
 <script setup>
 import { V3TableRowCell, V3TableHeadCell } from "./cell.js";
+import V3TableDock from './dock.vue';
 import {
     onMounted,
     useSlots,
@@ -63,7 +82,7 @@ const backElement = ref();
 const headElement = ref();
 const fillElement = ref();
 
-const props = defineProps({
+const $props = defineProps({
     rows: {
         type: Array,
         required: true,
@@ -85,23 +104,55 @@ const props = defineProps({
         default: false,
     },
 });
+const $emit = defineEmits({
+    scroll: null,
+});
 
-const slots = useSlots();
+const $slots = useSlots();
 const start = ref(0);
 const rowCount = ref(0);
 const dragging = ref(false);
 const sdw = ref(0);
+const dockRight = ref(0);
+const dockHeight = ref(0);
+const headHeight = ref(0);
+const columnWidths = reactive([]);
 
 const columns = computed(() => {
-    return slots.default();
+    if (!('default' in $slots)) {
+        return [];
+    }
+    const result = $slots.default();
+    result.sort((a, b) => {
+        const ad = a.props.dock === 'left' ? -1 : a.props.dock === 'right' ? 1 : 0;
+        const bd = b.props.dock === 'left' ? -1 : b.props.dock === 'right' ? 1 : 0;
+        return ad < bd ? -1 : ad === bd ? 0 : 1;
+    });
+    for (let i in result) {
+        result[i].width = columnWidths[i] ?? 100;
+    }
+    console.log('rrrrr', result);
+    return result;
+});
+const dockLeftColumns = computed(() => {
+    return columns.value.filter(c => {
+        return c.props.dock == 'left';
+    });
+});
+const dockRightColumns = computed(() => {
+    return columns.value.filter(c => {
+        return c.props.dock == 'right';
+    });
 });
 
 const rows = computed(() => {
-    return props.rows.slice(start.value, start.value + rowCount.value);
+    return $props.rows.slice(
+        start.value,
+        start.value + rowCount.value
+    );
 });
 
-const columnWidths = reactive([]);
-
+// 初始化列宽。
 for (let column of columns.value) {
     columnWidths.push(column.props.width ?? 100);
 }
@@ -117,12 +168,12 @@ const fillStyle = reactive({
     height: "100%",
 });
 const rowStyle = reactive({
-    height: `${props.rowHeight}px`,
+    height: `${$props.rowHeight}px`,
 });
 
 const styleClasses = computed(() => {
     const result = [];
-    if (props.height == null) {
+    if ($props.height == null) {
         result.push("filling");
     }
     return result;
@@ -156,7 +207,7 @@ const onHeadCellDrag = e => {
 
 const onHeadCellDragEnd = e => {
     const nsdw = e.screenX;
-    console.log('drag end',  nsdw - sdw.value + foreElement.value.scrollLeft);
+    console.log('drag end', nsdw - sdw.value + foreElement.value.scrollLeft);
     dragging.value = false;
 };
 
@@ -177,26 +228,37 @@ const onResize = throttle(() => {
     const bcw = backElement.value.clientWidth;
     const bch = backElement.value.clientHeight;
 
-    rowCount.value = Math.ceil(bch / props.rowHeight);
+    rowCount.value = Math.ceil(bch / $props.rowHeight);
 
     foreStyle.width = `${bcw}px`;
     backStyle.top = `${headElement.value.offsetHeight}px`;
     backStyle.bottom = `${foreElement.value.offsetHeight - foreElement.value.clientHeight
         }px`;
-    fillStyle.height = `${props.rowHeight * props.rows.length}px`;
-}, 600);
+    fillStyle.height = `${$props.rowHeight * $props.rows.length}px`;
+    console.log(backElement.value.offsetWidth, bcw);
+    dockRight.value = backElement.value.offsetWidth - bcw;
+    dockHeight.value = foreElement.value.clientHeight;
+}, 100);
+
+const onHeadResize = throttle(() => {
+    headHeight.value = headElement.value.offsetHeight;
+}, 100);
 
 const onVScroll = throttle((e) => {
     const bst = backElement.value.scrollTop;
-    const bse = fillElement.value.offsetHeight - props.rowHeight * 2;
-    start.value = Math.floor((bst / bse) * props.rows.length);
+    const bse = fillElement.value.offsetHeight - $props.rowHeight * 2;
+    start.value = Math.floor((bst / bse) * $props.rows.length);
+    $emit('scroll', e);
 }, 100);
 
 const observer = new ResizeObserver(onResize);
+const headObserver = new ResizeObserver(onHeadResize);
 
 onMounted(() => {
     onResize();
     observer.observe(rootElement.value);
+    onHeadResize();
+    headObserver.observe(headElement.value);
 });
 
 onBeforeUnmount(() => {

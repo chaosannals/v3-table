@@ -11,7 +11,7 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         lib: {
-            entry: resolve(__dirname, 'src', 'index.js'),
+            entry: resolve(__dirname, 'src', 'all.js'),
             name: 'v3-table',
             fileName: mode => `v3-table.${mode}.js`,
         },

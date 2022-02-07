@@ -8,5 +8,5 @@ export default {
     install(app) {
         app.component('v3-table', V3Table);
         app.component('v3-table-column', V3TableColumn);
-    }
-}
+    },
+};

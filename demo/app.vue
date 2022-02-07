@@ -5,28 +5,47 @@
         <v3-table-column :width="100">
           <template v-slot:head>
             <span>第1列</span>
-            <input/>
+            <input />
           </template>
-          <template v-slot="{row, index}">
-            <button>{{ row.id }} - {{index}}</button>
+          <template v-slot="{ row, index }">
+            <button>{{ row.id }} - {{ index }}</button>
           </template>
         </v3-table-column>
         <v3-table-column :width="200">
           <template v-slot:head>
             <span>第2列</span>
-            <input/>
+            <input />
           </template>
         </v3-table-column>
         <v3-table-column :width="300">
           <template v-slot:head>
             <span>第3列</span>
-            <input/>
+            <input />
           </template>
-          <v3-button>2</v3-button>
+          <button>2</button>
         </v3-table-column>
-        <v3-table-column title="第4列" :width="100"></v3-table-column>
-        <v3-table-column title="第5列"></v3-table-column>
+        <v3-table-column :width="100" dock="left">
+          <template v-slot:head>
+            <span>左靠1</span>
+            <input />
+          </template>
+          2
+        </v3-table-column>
+        <v3-table-column title="左靠2" dock="left">
+          <template v-slot="{ row, index }">
+            <button>{{ row.id }} - {{ index }}</button>
+          </template>
+        </v3-table-column>
+        <v3-table-column title="第5列">
+          <v3-button>55</v3-button>
+        </v3-table-column>
         <v3-table-column title="第6列"></v3-table-column>
+        <v3-table-column title="右靠1" dock="right"></v3-table-column>
+        <v3-table-column title="右靠2" dock="right">
+          <template v-slot="{ row, index }">
+            <button>{{ row.id }} - {{ index }}</button>
+          </template>
+        </v3-table-column>
         <v3-table-column title="第7列"></v3-table-column>
       </v3-table>
     </div>
@@ -70,7 +89,7 @@ body {
 }
 
 .table-box {
-  width: 60%;
+  width: 80%;
   height: 60%;
 }
 </style>

@@ -1,6 +1,4 @@
-const V3TableColumn = (props, context) => {
-
-};
+const V3TableColumn = (props, context) => {};
 
 V3TableColumn.props = {
     title: {
