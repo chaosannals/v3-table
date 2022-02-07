@@ -31,7 +31,7 @@
 
 <script setup>
 import lodash from 'lodash';
-import { computed, reactive } from "vue";
+import { computed, reactive, ref } from "vue";
 import { V3TableRowCell, V3TableHeadCell } from "./cell.js";
 
 const $props = defineProps({
@@ -51,6 +51,11 @@ const $props = defineProps({
         default: null,
     },
     right: {
+        type: [Number, null],
+        required: false,
+        default: null,
+    },
+    width: {
         type: [Number, null],
         required: false,
         default: null,
@@ -82,6 +87,8 @@ const $props = defineProps({
     },
 });
 
+const sdw = ref(0);
+
 const rootStyles = computed(() => {
     const result = {};
     if (lodash.isNumber($props.top)) {
@@ -93,6 +100,9 @@ const rootStyles = computed(() => {
     if (lodash.isNumber($props.right)) {
         result['right'] = `${$props.right}${$props.right != 0 ? 'px' : ''}`;
     }
+    if (lodash.isNumber($props.width)) {
+        result['width'] = `${$props.width}${$props.width != 0 ? 'px' : ''}`;
+    }
     if (lodash.isNumber($props.height)) {
         result['height'] = `${$props.height}${$props.height != 0 ? 'px' : ''}`;
     }
@@ -103,7 +113,7 @@ const headStyles = computed(() => {
     const result = [];
     for (let v of $props.columns) {
         const style = {};
-        style.minWidth = `${v.width}px`;
+        style.width = `${v.width}px`;
         style.height = `${$props.headHeight}px`;
         result.push(style);
     }
@@ -116,7 +126,7 @@ const rowStyle = reactive({
 const onHeadCellDragStart = e => {
     sdw.value = e.screenX;
     console.log('drag start', e);
-    dragging.value = true;
+    // dragging.value = true;
 };
 
 const onHeadCellDrag = e => {
@@ -125,8 +135,8 @@ const onHeadCellDrag = e => {
 
 const onHeadCellDragEnd = e => {
     const nsdw = e.screenX;
-    console.log('drag end', nsdw - sdw.value + foreElement.value.scrollLeft);
-    dragging.value = false;
+    // console.log('drag end', nsdw - sdw.value + foreElement.value.scrollLeft);
+    // dragging.value = false;
 };
 
 const onHeadCellDragOver = e => {
@@ -145,7 +155,8 @@ const onHeadCellDrop = e => {
     overflow: hidden;
     position: absolute;
     z-index: 100;
-    background: #fff;
+    background: #f6f6f6f6;
+    box-shadow: 0 -2px 2px 2px #2222;
 }
 
 .v3-table-head-cell {

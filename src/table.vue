@@ -113,6 +113,8 @@ const start = ref(0);
 const rowCount = ref(0);
 const dragging = ref(false);
 const sdw = ref(0);
+const dockLeftWidth = ref(0);
+const dockRightWidth = ref(0);
 const dockRight = ref(0);
 const dockHeight = ref(0);
 const headHeight = ref(0);
@@ -131,7 +133,6 @@ const columns = computed(() => {
     for (let i in result) {
         result[i].width = columnWidths[i] ?? 100;
     }
-    console.log('rrrrr', result);
     return result;
 });
 const dockLeftColumns = computed(() => {
@@ -189,7 +190,8 @@ const headStyles = computed(() => {
     const result = [];
     for (let i in columns.value) {
         const style = {};
-        style.minWidth = `${columnWidths[i]}px`;
+        style.width = `${columnWidths[i]}px`;
+        style.minWidth = style.width;
         result.push(style);
     }
     return result;

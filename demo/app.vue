@@ -40,7 +40,11 @@
           <v3-button>55</v3-button>
         </v3-table-column>
         <v3-table-column title="第6列"></v3-table-column>
-        <v3-table-column title="右靠1" dock="right"></v3-table-column>
+        <v3-table-column title="右靠1" dock="right">
+          <template v-slot="info">
+            <span>{{ info.index }}</span>
+          </template>
+        </v3-table-column>
         <v3-table-column title="右靠2" dock="right">
           <template v-slot="{ row, index }">
             <button>{{ row.id }} - {{ index }}</button>
