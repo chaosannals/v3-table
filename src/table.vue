@@ -14,8 +14,6 @@
             ref="foreElement"
             class="v3-table-fore"
             :style="foreStyle"
-            @dragover="onHeadCellDragOver"
-            @drop="onHeadCellDrop"
             @mousewheel="onMouseWheel"
         >
             <table class="v3-table-main" :style="tableStyle">
@@ -33,8 +31,6 @@
                         <div
                             class="v3-table-head-cell-drag"
                             draggable="true"
-                            @dragstart="onHeadCellDragStart"
-                            @dragend="onHeadCellDragEnd"
                         ></div>
                     </th>
                 </tr>
@@ -203,25 +199,6 @@ const onHeadCellDragStart = e => {
     sdw.value = e.screenX;
     console.log('drag start', e);
     dragging.value = true;
-};
-
-const onHeadCellDrag = e => {
-    console.log('drag', e);
-};
-
-const onHeadCellDragEnd = e => {
-    const nsdw = e.screenX;
-    console.log('drag end', nsdw - sdw.value + foreElement.value.scrollLeft);
-    dragging.value = false;
-};
-
-const onHeadCellDragOver = e => {
-    e.preventDefault();
-    // console.log('drag over', e);
-};
-
-const onHeadCellDrop = e => {
-    console.log('drop', e);
 };
 
 const onMouseWheel = e => {

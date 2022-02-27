@@ -12,8 +12,6 @@
                     <div
                         class="v3-table-head-cell-drag"
                         draggable="true"
-                        @dragstart="onHeadCellDragStart"
-                        @dragend="onHeadCellDragEnd"
                     ></div>
                 </th>
             </tr>
@@ -123,34 +121,10 @@ const headStyles = computed(() => {
     }
     return result;
 });
+
 const rowStyle = reactive({
     height: `${$props.rowHeight}px`,
 });
-
-const onHeadCellDragStart = e => {
-    sdw.value = e.screenX;
-    console.log('drag start', e);
-    // dragging.value = true;
-};
-
-const onHeadCellDrag = e => {
-    console.log('drag', e);
-};
-
-const onHeadCellDragEnd = e => {
-    const nsdw = e.screenX;
-    // console.log('drag end', nsdw - sdw.value + foreElement.value.scrollLeft);
-    // dragging.value = false;
-};
-
-const onHeadCellDragOver = e => {
-    e.preventDefault();
-    // console.log('drag over', e);
-};
-
-const onHeadCellDrop = e => {
-    console.log('drop', e);
-};
 
 const onMouseWheel = e => {
     $emit('mousewheel', e);
