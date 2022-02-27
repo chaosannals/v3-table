@@ -8,6 +8,7 @@
             :head-height="headHeight"
             :row-height="rowHeight"
             :left="0"
+            @mousewheel="onMouseWheel"
         />
         <div
             ref="foreElement"
@@ -55,6 +56,7 @@
             :head-height="headHeight"
             :row-height="rowHeight"
             :right="dockRight"
+            @mousewheel="onMouseWheel"
         />
         <div ref="backElement" class="v3-table-back" :style="backStyle" @scroll="onVScroll">
             <div ref="fillElement" class="v3-table-fill" :style="fillStyle"></div>

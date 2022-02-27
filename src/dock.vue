@@ -1,5 +1,5 @@
 <template>
-    <div class="v3-table-dock" :style="rootStyles">
+    <div class="v3-table-dock" :style="rootStyles" @mousewheel="onMouseWheel">
         <table>
             <tr ref="headElement" class="v3-table-head">
                 <th
@@ -33,6 +33,10 @@
 import lodash from 'lodash';
 import { computed, reactive, ref } from "vue";
 import { V3TableRowCell, V3TableHeadCell } from "./cell.js";
+
+const $emit = defineEmits({
+    mousewheel: null,
+});
 
 const $props = defineProps({
     start: {
@@ -146,6 +150,10 @@ const onHeadCellDragOver = e => {
 
 const onHeadCellDrop = e => {
     console.log('drop', e);
+};
+
+const onMouseWheel = e => {
+    $emit('mousewheel', e);
 };
 
 </script>

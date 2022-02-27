@@ -3,6 +3,7 @@ import {
 } from "vue";
 
 /**
+ * 表格行单元格
  * 
  * @param {*} props 
  * @param {*} context 
@@ -29,6 +30,7 @@ V3TableRowCell.props = {
 };
 
 /**
+ * 表头单元格
  * 
  * @param {*} props 
  * @param {*} context 
