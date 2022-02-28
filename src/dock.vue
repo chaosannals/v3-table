@@ -8,11 +8,9 @@
                     :key="i"
                     :style="headStyles[i]"
                 >
+                    <div :data-column="`${column.no}`" class="v3-table-head-cell-drag left"></div>
                     <v3-table-head-cell :renderer="column.children?.head" :content="column.props" />
-                    <div
-                        class="v3-table-head-cell-drag"
-                        draggable="true"
-                    ></div>
+                    <div :data-column="`${column.no}`" class="v3-table-head-cell-drag right"></div>
                 </th>
             </tr>
             <tr class="v3-table-row" v-for="(row, i) in rows" :key="i" :style="rowStyle">
@@ -89,8 +87,6 @@ const $props = defineProps({
     },
 });
 
-const sdw = ref(0);
-
 const rootStyles = computed(() => {
     const result = {};
     if (lodash.isNumber($props.top)) {
@@ -150,10 +146,25 @@ const onMouseWheel = e => {
 .v3-table-head-cell-drag {
     position: absolute;
     top: 0;
-    right: 0;
     bottom: 0;
     width: 5px;
     height: 100%;
-    cursor: ew-resize;
+
+    &.left {
+        left: 0;
+        cursor: e-resize;
+
+        &:hover {
+            background: #39fd;
+        }
+    }
+    &.right {
+        right: 0;
+        cursor: w-resize;
+
+        &:hover {
+            background: #f93d;
+        }
+    }
 }
 </style>

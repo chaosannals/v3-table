@@ -1,5 +1,13 @@
 <template>
-    <div ref="rootElement" class="v3-table" :class="styleClasses">
+    <div
+        ref="rootElement"
+        class="v3-table"
+        :class="styleClasses"
+        @mousedown="onMouseDown"
+        @mouseup="onMouseUp"
+        @mouseleave="onMouseLeave"
+        @mousemove="onMouseMove"
+    >
         <v3-table-dock
             :columns="dockLeftColumns"
             :start="start"
@@ -10,12 +18,7 @@
             :left="0"
             @mousewheel="onMouseWheel"
         />
-        <div
-            ref="foreElement"
-            class="v3-table-fore"
-            :style="foreStyle"
-            @mousewheel="onMouseWheel"
-        >
+        <div ref="foreElement" class="v3-table-fore" :style="foreStyle" @mousewheel="onMouseWheel">
             <table class="v3-table-main" :style="tableStyle">
                 <tr ref="headElement" class="v3-table-head">
                     <th
@@ -24,14 +27,12 @@
                         :key="i"
                         :style="headStyles[i]"
                     >
+                        <div :data-column="`${column.no}`" class="v3-table-head-cell-drag left"></div>
                         <v3-table-head-cell
                             :renderer="column.children?.head"
                             :content="column.props"
                         />
-                        <div
-                            class="v3-table-head-cell-drag"
-                            draggable="true"
-                        ></div>
+                        <div :data-column="`${column.no}`" class="v3-table-head-cell-drag right"></div>
                     </th>
                 </tr>
                 <tr class="v3-table-row" v-for="(row, i) in rows" :key="i" :style="rowStyle">
@@ -56,6 +57,9 @@
         />
         <div ref="backElement" class="v3-table-back" :style="backStyle" @scroll="onVScroll">
             <div ref="fillElement" class="v3-table-fill" :style="fillStyle"></div>
+        </div>
+        <div v-if="drag.dragging" class="v3-table-drag-pane">
+            <div class="v3-table-drag-line" :style="lineStyle"></div>
         </div>
         <slot></slot>
     </div>
@@ -109,10 +113,12 @@ const $emit = defineEmits({
 const $slots = useSlots();
 const start = ref(0);
 const rowCount = ref(0);
-const dragging = ref(false);
-const sdw = ref(0);
-const dockLeftWidth = ref(0);
-const dockRightWidth = ref(0);
+const drag = reactive({
+    dragging: false,
+    offset: 0,
+    column: null,
+    signed: 1,
+});
 const dockRight = ref(0);
 const dockHeight = ref(0);
 const headHeight = ref(0);
@@ -130,6 +136,7 @@ const columns = computed(() => {
     });
     for (let i in result) {
         result[i].width = columnWidths[i] ?? 100;
+        result[i].no = i;
     }
     return result;
 });
@@ -170,6 +177,8 @@ const rowStyle = reactive({
     height: `${$props.rowHeight}px`,
 });
 
+const lineStyle = reactive({});
+
 const styleClasses = computed(() => {
     const result = [];
     if ($props.height == null) {
@@ -195,14 +204,46 @@ const headStyles = computed(() => {
     return result;
 });
 
-const onHeadCellDragStart = e => {
-    sdw.value = e.screenX;
-    console.log('drag start', e);
-    dragging.value = true;
-};
-
 const onMouseWheel = e => {
     backElement.value.scrollBy(0, -e.wheelDelta);
+}
+
+const onMouseDown = (e) => {
+    const cl = e.target.classList;
+    if (cl.contains('v3-table-head-cell-drag')) {
+        lineStyle.left = `${e.clientX}px`;
+        drag.dragging = true;
+        drag.offset = e.clientX;
+        drag.column = Number(e.target.dataset.column);
+        drag.signed = cl.contains('left') ? -1 : 1;
+        console.log('down', drag, e);
+    }
+}
+
+const onMouseMove = (e) => {
+    if (!drag.dragging) return;
+    lineStyle.left = `${e.offsetX}px`;
+    console.log('move', e);
+}
+
+const endDrag = (e) => {
+    if (!drag.dragging) return;
+    drag.dragging = false;
+    const offset = e.clientX - drag.offset;
+    const i = drag.column;
+    document.getSelection().removeAllRanges();
+    columnWidths[i] = Math.max(20, columnWidths[i] + offset * drag.signed);
+    console.log('end drag', e.clientX, offset, drag);
+}
+
+const onMouseUp = (e) => {
+    endDrag(e);
+    console.log('up', e);
+}
+
+const onMouseLeave = (e) => {
+    endDrag(e);
+    console.log('leave', e);
 }
 
 const onResize = throttle(() => {
@@ -285,7 +326,17 @@ onBeforeUnmount(() => {
     bottom: 0;
     z-index: 100;
     width: 100%;
-    background: #2222;
+    background: #2221;
+}
+
+.v3-table-drag-line {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    height: 100%;
+    border-left: 1px dotted #222d;
 }
 
 .v3-table-head-cell {
@@ -297,11 +348,26 @@ onBeforeUnmount(() => {
 .v3-table-head-cell-drag {
     position: absolute;
     top: 0;
-    right: 0;
     bottom: 0;
     width: 5px;
     height: 100%;
-    cursor: ew-resize;
+
+    &.left {
+        left: 0;
+        cursor: e-resize;
+
+        &:hover {
+            background: #39fd;
+        }
+    }
+    &.right {
+        right: 0;
+        cursor: w-resize;
+
+        &:hover {
+            background: #f93d;
+        }
+    }
 }
 
 .v3-table-back {
