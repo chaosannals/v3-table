@@ -8,9 +8,17 @@
                     :key="i"
                     :style="headStyles[i]"
                 >
-                    <div :data-column="`${column.no}`" class="v3-table-head-cell-drag left"></div>
+                    <div
+                        v-if="['both', 'left'].indexOf(rewidth) >= 0"
+                        :data-column="`${column.no}`"
+                        class="v3-table-head-cell-drag left"
+                    ></div>
                     <v3-table-head-cell :renderer="column.children?.head" :content="column.props" />
-                    <div :data-column="`${column.no}`" class="v3-table-head-cell-drag right"></div>
+                    <div
+                        v-if="['both', 'right'].indexOf(rewidth) >= 0"
+                        :data-column="`${column.no}`"
+                        class="v3-table-head-cell-drag right"
+                    ></div>
                 </th>
             </tr>
             <tr class="v3-table-row" v-for="(row, i) in rows" :key="i" :style="rowStyle">
@@ -85,6 +93,11 @@ const $props = defineProps({
         required: false,
         default: 30,
     },
+    rewidth: {
+        type: String,
+        required: false,
+        default: 'both',
+    }
 });
 
 const rootStyles = computed(() => {
@@ -154,17 +167,17 @@ const onMouseWheel = e => {
         left: 0;
         cursor: e-resize;
 
-        &:hover {
-            background: #39fd;
-        }
+        // &:hover {
+        //     background: #39fd;
+        // }
     }
     &.right {
         right: 0;
         cursor: w-resize;
 
-        &:hover {
-            background: #f93d;
-        }
+        // &:hover {
+        //     background: #f93d;
+        // }
     }
 }
 </style>

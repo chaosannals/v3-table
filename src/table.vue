@@ -9,25 +9,26 @@
         @mousemove="onMouseMove"
     >
         <v3-table-dock
+            rewidth="right"
             :columns="dockLeftColumns"
             :start="start"
             :rows="rows"
-            :height="dockHeight"
+            :height="dock.height"
             :head-height="headHeight"
             :row-height="rowHeight"
             :left="0"
             @mousewheel="onMouseWheel"
         />
         <div ref="foreElement" class="v3-table-fore" :style="foreStyle" @mousewheel="onMouseWheel">
-            <table class="v3-table-main" :style="tableStyle">
+            <table class="v3-table-main">
                 <tr ref="headElement" class="v3-table-head">
                     <th
+                        :ref="h => headElements.add(h)"
                         class="v3-table-head-cell"
                         v-for="(column, i) in columns"
                         :key="i"
                         :style="headStyles[i]"
                     >
-                        <div :data-column="`${column.no}`" class="v3-table-head-cell-drag left"></div>
                         <v3-table-head-cell
                             :renderer="column.children?.head"
                             :content="column.props"
@@ -46,13 +47,14 @@
             </table>
         </div>
         <v3-table-dock
+            rewidth="left"
             :columns="dockRightColumns"
             :start="start"
             :rows="rows"
-            :height="dockHeight"
+            :height="dock.height"
             :head-height="headHeight"
             :row-height="rowHeight"
-            :right="dockRight"
+            :right="dock.right"
             @mousewheel="onMouseWheel"
         />
         <div ref="backElement" class="v3-table-back" :style="backStyle" @scroll="onVScroll">
@@ -75,14 +77,16 @@ import {
     onBeforeUnmount,
     computed,
     reactive,
+    nextTick,
 } from "vue";
 import { throttle } from "lodash";
 
-const rootElement = ref();
-const foreElement = ref();
-const backElement = ref();
-const headElement = ref();
-const fillElement = ref();
+const rootElement = ref(); // 控件根元素引用
+const foreElement = ref(); // 前面板（主表格）
+const backElement = ref(); // 后面板（撑开滚轮）
+const headElement = ref(); // 表头（前面板表头）
+const headElements = reactive(new Set()); // 表头元素集合
+const fillElement = ref(); // 支撑（后面板撑起）
 
 const $props = defineProps({
     rows: {
@@ -119,8 +123,10 @@ const drag = reactive({
     column: null,
     signed: 1,
 });
-const dockRight = ref(0);
-const dockHeight = ref(0);
+const dock = reactive({
+    right: 0,
+    height: 0,
+});
 const headHeight = ref(0);
 const columnWidths = reactive([]);
 
@@ -140,6 +146,7 @@ const columns = computed(() => {
     }
     return result;
 });
+
 const dockLeftColumns = computed(() => {
     return columns.value.filter(c => {
         return c.props.dock == 'left';
@@ -151,6 +158,7 @@ const dockRightColumns = computed(() => {
     });
 });
 
+// 计算显示的行
 const rows = computed(() => {
     return $props.rows.slice(
         start.value,
@@ -187,12 +195,6 @@ const styleClasses = computed(() => {
     return result;
 });
 
-const tableStyle = computed(() => {
-    return {
-        // width: `${tableWidth.value}px`
-    };
-});
-
 const headStyles = computed(() => {
     const result = [];
     for (let i in columns.value) {
@@ -223,7 +225,7 @@ const onMouseDown = (e) => {
 const onMouseMove = (e) => {
     if (!drag.dragging) return;
     lineStyle.left = `${e.offsetX}px`;
-    console.log('move', e);
+    // console.log('move', e);
 }
 
 const endDrag = (e) => {
@@ -233,7 +235,8 @@ const endDrag = (e) => {
     const i = drag.column;
     document.getSelection().removeAllRanges();
     columnWidths[i] = Math.max(20, columnWidths[i] + offset * drag.signed);
-    console.log('end drag', e.clientX, offset, drag);
+    // console.log('end drag', columnWidths[i], e.clientX, offset, drag);
+    nextTick(() => getColumnsWidth());
 }
 
 const onMouseUp = (e) => {
@@ -246,6 +249,12 @@ const onMouseLeave = (e) => {
     console.log('leave', e);
 }
 
+// 得到当前表头元素集合的宽度
+const getColumnsWidth = throttle(() => {
+    Array.from(headElements).forEach((h, i) => columnWidths[i] = h.offsetWidth);
+}, 100);
+
+// 表格大小变化事件处理
 const onResize = throttle(() => {
     const bcw = backElement.value.clientWidth;
     const bch = backElement.value.clientHeight;
@@ -257,12 +266,14 @@ const onResize = throttle(() => {
     backStyle.bottom = `${foreElement.value.offsetHeight - foreElement.value.clientHeight
         }px`;
     fillStyle.height = `${$props.rowHeight * $props.rows.length}px`;
-    console.log(backElement.value.offsetWidth, bcw);
-    dockRight.value = backElement.value.offsetWidth - bcw;
-    dockHeight.value = foreElement.value.clientHeight;
+    // console.log(backElement.value.offsetWidth, bcw);
+    dock.right = backElement.value.offsetWidth - bcw;
+    dock.height = foreElement.value.clientHeight;
+    getColumnsWidth();
 }, 100);
 
 const onHeadResize = throttle(() => {
+    // TODO 考察 是否移动到 resize
     headHeight.value = headElement.value.offsetHeight;
 }, 100);
 
@@ -356,17 +367,17 @@ onBeforeUnmount(() => {
         left: 0;
         cursor: e-resize;
 
-        &:hover {
-            background: #39fd;
-        }
+        // &:hover {
+        //     background: #39fd;
+        // }
     }
     &.right {
         right: 0;
         cursor: w-resize;
 
-        &:hover {
-            background: #f93d;
-        }
+        // &:hover {
+        //     background: #f93d;
+        // }
     }
 }
 
