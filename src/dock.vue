@@ -146,8 +146,12 @@ const onMouseWheel = e => {
     overflow: hidden;
     position: absolute;
     z-index: 100;
-    background: #f6f6f6f6;
+    background: #fff;
     box-shadow: 0 -2px 2px 2px #2222;
+}
+
+.v3-table-head {
+    box-shadow: 0 3px 6px -2px #2222;
 }
 
 .v3-table-head-cell {
