@@ -1,6 +1,6 @@
 {
   "name": "v3-table",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "main": "dist/v3-table.es.js",
   "files": [
     "dist"
@@ -19,6 +19,7 @@
     "@vitejs/plugin-vue": "^2.0.0",
     "sass": "^1.49.0",
     "v3-widgets": "^0.0.1",
-    "vite": "^2.7.2"
+    "vite": "^2.7.2",
+    "vite-plugin-style-inject": "^0.0.1"
   }
 }

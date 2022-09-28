@@ -1,6 +1,7 @@
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import VitePluginStyleInject from 'vite-plugin-style-inject';//第三方的小库，css 文件转 js 生成 <style> 标签。
 
 export default defineConfig({
     resolve: {
@@ -27,5 +28,6 @@ export default defineConfig({
     },
     plugins: [
         vue(),
+        VitePluginStyleInject(),
     ],
 })
