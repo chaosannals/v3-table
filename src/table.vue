@@ -1,62 +1,27 @@
 <template>
-    <div
-        ref="rootElement"
-        class="v3-table"
-        :class="styleClasses"
-        @mousedown="onMouseDown"
-        @mouseup="onMouseUp"
-        @mouseleave="onMouseLeave"
-        @mousemove="onMouseMove"
-    >
-        <v3-table-dock
-            rewidth="right"
-            :columns="dockLeftColumns"
-            :start="start"
-            :rows="rows"
-            :height="dock.height"
-            :head-height="headHeight"
-            :row-height="rowHeight"
-            :left="0"
-            @mousewheel="onMouseWheel"
-        />
+    <div ref="rootElement" class="v3-table" :class="styleClasses" @mousedown="onMouseDown" @mouseup="onMouseUp"
+        @mouseleave="onMouseLeave" @mousemove="onMouseMove">
+        <v3-table-dock rewidth="right" :columns="dockLeftColumns" :start="start" :rows="rows" :height="dock.height"
+            :head-height="headHeight" :row-height="rowHeight" :left="0" @mousewheel="onMouseWheel" />
         <div ref="foreElement" class="v3-table-fore" :style="foreStyle" @mousewheel="onMouseWheel">
             <table class="v3-table-main">
                 <tr ref="headElement" class="v3-table-head">
-                    <th
-                        :ref="h => headElements.add(h)"
-                        class="v3-table-head-cell"
-                        v-for="(column, i) in columns"
-                        :key="i"
-                        :style="headStyles[i]"
-                    >
-                        <v3-table-head-cell
-                            :renderer="column.children?.head"
-                            :content="column.props"
-                        />
+                    <th :ref="h => headElements.add(h)" v-for="(column, i) in columns" :class="column.thClass" :key="i"
+                        :style="headStyles[i]">
+                        <v3-table-head-cell :renderer="column.children?.head" :content="column.props" />
                         <div :data-column="`${column.no}`" class="v3-table-head-cell-drag right"></div>
                     </th>
                 </tr>
                 <tr class="v3-table-row" v-for="(row, i) in rows" :key="i" :style="rowStyle">
-                    <td class="v3-table-row-cell" v-for="(column, j) in columns" :key="j">
-                        <v3-table-row-cell
-                            :renderer="column.children?.default"
-                            :content="{ row: row, index: start + i }"
-                        />
+                    <td v-for="(column, j) in columns" :key="j" :class="column.tdClass">
+                        <v3-table-row-cell :renderer="column.children?.default"
+                            :content="{ row: row, index: start + i }" />
                     </td>
                 </tr>
             </table>
         </div>
-        <v3-table-dock
-            rewidth="left"
-            :columns="dockRightColumns"
-            :start="start"
-            :rows="rows"
-            :height="dock.height"
-            :head-height="headHeight"
-            :row-height="rowHeight"
-            :right="dock.right"
-            @mousewheel="onMouseWheel"
-        />
+        <v3-table-dock rewidth="left" :columns="dockRightColumns" :start="start" :rows="rows" :height="dock.height"
+            :head-height="headHeight" :row-height="rowHeight" :right="dock.right" @mousewheel="onMouseWheel" />
         <div ref="backElement" class="v3-table-back" :style="backStyle" @scroll="onVScroll">
             <div ref="fillElement" class="v3-table-fill" :style="fillStyle"></div>
         </div>
@@ -141,8 +106,16 @@ const columns = computed(() => {
         return ad < bd ? -1 : ad === bd ? 0 : 1;
     });
     for (let i in result) {
+        let thClass = ['v3-table-head-cell'];
+        let tdClass = ['v3-table-row-cell'];
+        if (result[i].props.dock) {
+            thClass.push('dock-placeholder');
+            tdClass.push('dock-placeholder');
+        }
         result[i].width = columnWidths[i] ?? 100;
         result[i].no = i;
+        result[i].thClass = thClass;
+        result[i].tdClass = tdClass;
     }
     return result;
 });
@@ -366,18 +339,11 @@ onBeforeUnmount(() => {
     &.left {
         left: 0;
         cursor: e-resize;
-
-        // &:hover {
-        //     background: #39fd;
-        // }
     }
+
     &.right {
         right: 0;
         cursor: w-resize;
-
-        // &:hover {
-        //     background: #f93d;
-        // }
     }
 }
 
@@ -393,5 +359,9 @@ onBeforeUnmount(() => {
     z-index: 1;
     width: 100%;
     background: transparent;
+}
+
+.dock-placeholder {
+    visibility: hidden;
 }
 </style>
