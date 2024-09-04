@@ -276,7 +276,6 @@ onBeforeUnmount(() => {
 .v3-table {
     position: relative;
     overflow: hidden;
-    border: 1px solid #f6f6f6;
     box-sizing: border-box;
     background: #fff;
 
@@ -297,7 +296,7 @@ onBeforeUnmount(() => {
     bottom: 0;
     z-index: 10;
     width: 100%;
-    background: #f6f6f6f6;
+    background: #fff;
 }
 
 .v3-table-drag-pane {
@@ -321,6 +320,10 @@ onBeforeUnmount(() => {
     width: 1px;
     height: 100%;
     border-left: 1px dotted #222d;
+}
+
+.v3-table-head {
+    box-shadow: 0 3px 6px -2px #2222;
 }
 
 .v3-table-head-cell {
